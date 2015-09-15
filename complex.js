@@ -78,11 +78,11 @@ function complex(real, imag) {
     exp: zfunc(function(z) {
       return complex.E.pow(z);
     }),
-    log: zfunc(function(z) {
+    log: zfunc(function(z, base) {
       var abs = z.abs();
       z.imag = Math.atan2(z.imag, z.real);
       z.real = Math.log(abs);
-      return z;
+      return base === void 0 ? z : z.div(complex.log(base));
     }),
     log10: zfunc(function(z) {
       return complex.log(z).div(complex.log(10));
@@ -153,13 +153,24 @@ function complex(real, imag) {
       return complex(a * Math.cos(b), a * Math.sin(b));
     }
   });
+  function addConstant(name, value) {
+    Object.defineProperty(complex, name, {
+      enumerable: false,
+      configurable: false,
+      modifiable: false,
+      value: value
+    });
+  }
   ['E', 'LN10', 'LN2', 'LOG10E', 'LOG2E', 'PI', 'SQRT1_2', 'SQRT2']
     .forEach(function(mathConstant) {
       if (Math.hasOwnProperty(mathConstant))
-        complex[mathConstant] = complex(Math[mathConstant], 0);
+        addConstant(mathConstant, complex(Math[mathConstant], 0));
     });
-  complex.ZERO = complex(1, 0);
-  complex.ONE = complex(1, 0);
-  complex.I = complex(0, 1);
-  complex.NEGATIVE_I = complex(0, -1);
+  addConstant('ZERO', complex(0, 0));
+  addConstant('ONE', complex(1, 0));
+  addConstant('I', complex(0, 1));
+  addConstant('NEGATIVE_I', complex(0, -1));
 })();
+
+if (typeof module !== 'undefined')
+  module.exports = complex;
